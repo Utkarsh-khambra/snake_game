@@ -9,6 +9,7 @@ class Screen {
 public:
   Screen();
   void render(std::span<Point> vertices) noexcept;
+  void clear() noexcept;
 
 private:
   void set_cell_size();

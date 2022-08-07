@@ -14,3 +14,8 @@ struct Rect {
   int height = 1;
 };
 void switch_raw_mode();
+void swith_to_alternate_buffer() noexcept;
+void swith_to_normal_buffer() noexcept;
+void get_cell_dims() noexcept;
+void hide_cursor() noexcept;
+void show_cursor() noexcept;

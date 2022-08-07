@@ -11,6 +11,14 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
+namespace {
+void inline print_cell_with(Point p, std::string_view fill) {
+  fmt::print("\033[{};{}H", p.y + 1, p.x + 1);
+  fmt::print("{}", fill);
+}
+
+} // namespace
+
 Screen::Screen() {
   struct winsize w;
   ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
@@ -33,10 +41,8 @@ void Screen::render(std::span<Point> vertices) noexcept {
       vertices |
       std::views::transform(std::bind_front(&Screen::to_screen_space, this)) |
       std::views::filter(std::bind_front(&Screen::contains, this));
-  for (auto v : vs) {
-    fmt::print("\033[{};{}H", v.y + 1, v.x + 1);
-    fmt::print("{}", _single_cell);
-  }
+  for (auto v : vs)
+    print_cell_with(v, _single_cell);
 }
 
 bool Screen::contains(Point p) const noexcept {
@@ -59,3 +65,5 @@ void Screen::set_cell_size() {
   std::from_chars(ptr, ptr + useful_info.find('t'), cell_width);
   _cells_per_block = std::ceil(static_cast<float>(cell_height) / cell_width);
 }
+
+void Screen::clear() noexcept { fmt::print("\033[2J"); }

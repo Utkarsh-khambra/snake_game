@@ -11,6 +11,7 @@ public:
   void push_section() noexcept;
   std::span<Point> data() noexcept;
   void move() noexcept;
+  void on_keys(char i) noexcept;
 
 private:
   std::vector<Point> _sections;

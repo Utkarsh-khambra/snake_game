@@ -1,26 +1,12 @@
 #include "Snake.hpp"
 #include "helpers.hpp"
+#include <fmt/core.h>
 #include <ranges>
 
 const int SNAKE_FAT = 1;
 Snake::Snake() {
-	using enum Direction;
   _sections.push_back({3, 4});
   _dirs.push_back(Direction::Left);
-  push_section();
-  change_direction_to(Down);
-	move();
-	move();
-  push_section();
-  change_direction_to(Left);
-	move();
-	move();
-  push_section();
-  change_direction_to(Down);
-  push_section();
-	move();
-  push_section();
-	move();
 }
 
 void Snake::push_section() noexcept {
@@ -53,6 +39,7 @@ std::span<Point> Snake::data() noexcept { return _sections; }
 void Snake::move() noexcept {
   using enum Direction;
   auto prev_dir = _dirs.front();
+  // fmt::print("Move\n");
   for (auto i : std::views::iota(size_t(0), _sections.size())) {
     switch (_dirs[i]) {
     case Up:
@@ -71,5 +58,25 @@ void Snake::move() noexcept {
       break;
     }
     std::swap(_dirs[i], prev_dir);
+  }
+}
+
+void Snake::on_keys(char key) noexcept {
+  using enum Direction;
+  switch (key) {
+  case 'a':
+    change_direction_to(Left);
+    break;
+  case 's':
+    change_direction_to(Up);
+    break;
+  case 'w':
+    change_direction_to(Down);
+    break;
+  case 'd':
+    change_direction_to(Right);
+    break;
+  default:
+    break;
   }
 }
