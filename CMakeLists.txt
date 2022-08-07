@@ -31,7 +31,12 @@ find_package(Catch2 REQUIRED)
 
 # ---- Create library ----
 # add_executable(snake_game src/impls/tests.cpp src/impls/catch_main.cpp)
-add_executable(snake_game src/main.cpp)
+add_executable(snake_game src/main.cpp
+													src/Game.cpp
+													src/Snake.cpp
+													src/Screen.cpp
+													src/helpers.cpp
+													)
 # Note: for header-only libraries change all PUBLIC flags to INTERFACE and create an interface
 # target: add_library(snake_game INTERFACE) set_target_properties(snake_game PROPERTIES
 # INTERFACE_COMPILE_FEATURES cxx_std_17)
