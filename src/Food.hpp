@@ -3,14 +3,15 @@
 #include <istream>
 #include <span>
 #include <vector>
+
+constexpr int FOOD_SIZE = 2;
 enum class FoodType { Trash, Basic, Good, Delectable };
 class FoodStorage {
 public:
   std::span<Point> data() noexcept;
   void add_food(Point p, FoodType t) noexcept;
-  int available() const noexcept { return _store.size(); }
 
 private:
-  std::vector<Point> _store{};
-  std::vector<FoodType> _types;
+  std::array<Point, FOOD_SIZE * FOOD_SIZE> _store{};
+  FoodType _t;
 };

@@ -1,4 +1,5 @@
 #include "Screen.hpp"
+#include "helpers.hpp"
 #include <array>
 #include <charconv>
 #include <cmath>
@@ -12,13 +13,15 @@
 #include <unistd.h>
 #include <utility>
 
-bool Screen::is_on_screen(Point p) const noexcept{
-	return contains(to_screen_space(p));
+bool Screen::is_on_screen(Point p) const noexcept {
+  return contains(to_screen_space(p));
 }
 
 void Screen::print_cell_with(Point p, std::string_view fill) const noexcept {
-  fmt::print("\033[{};{}H", p.y + 1, p.x + 1);
-  auto s = p.props == VertProps::Blink ? fmt::format("\033[5m{}", fill) : fmt::format("{}", fill);
+  move_cursor_to(p.x + 1, p.y + 1);
+  // fmt::print("\033[{};{}H", p.y + 1, p.x + 1);
+  auto s = p.props == VertProps::Blink ? fmt::format("\033[5m{}", fill)
+                                       : fmt::format("{}", fill);
   for (auto i : std::views::iota(0, _cells_per_block))
     fmt::print("{}", s);
   fmt::print("\033[25m");
@@ -80,4 +83,19 @@ void Screen::set_cell_size() {
   _cells_per_block = std::ceil(static_cast<float>(cell_height) / cell_width);
 }
 
-void Screen::clear() noexcept { fmt::print("\033[2J"); }
+void Screen::clear() const noexcept { fmt::print("\033[2J"); }
+
+void Screen::show_gameover() const noexcept {
+  move_cursor_to(_screen_width / 2, _screen_height / 2);
+  fmt::print("Game over\n");
+}
+
+bool Screen::did_hit_borders(Point p) const noexcept {
+  p = to_screen_space(p);
+  return test_collistion_with_line(p, {0, 0}, {_screen_width, 0}) ||
+         test_collistion_with_line(p, {0, 0}, {0, _screen_height}) ||
+         test_collistion_with_line(p, {_screen_width, 0},
+                                   {_screen_width, _screen_height}) ||
+         test_collistion_with_line(p, {0, _screen_height},
+                                   {_screen_width, _screen_height});
+}

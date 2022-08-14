@@ -17,6 +17,7 @@ SnakeGame::SnakeGame() {
   _gen.seed(rd());
   using p = decltype(_random_points)::param_type;
   _random_points.param(p(0, 100));
+  generate_food();
 }
 
 static int kbhit() {
@@ -55,11 +56,11 @@ void SnakeGame::run() {
     handle_input();
     update();
     render();
-    if (count % 15 == 0) {
-      count = 1;
-      _snake.push_section();
-    }
-    ++count;
+    // if (count % 15 == 0) {
+    //   count = 1;
+    //   _snake.push_section();
+    // }
+    // ++count;
     std::this_thread::sleep_for(
         100ms - std::chrono::duration<double, std::milli>(
                     std::chrono::steady_clock::now() - current));
@@ -86,11 +87,27 @@ void SnakeGame::handle_input() noexcept {
 }
 void SnakeGame::update() noexcept {
   _snake.move();
-  if (_food.available() < 5)
-    generate_food();
+  if (_snake.test_collision_with_itself()) {
+    _running = false;
+    _game_over = true;
+  }
+  if (_snake.test_collision(_food.data())) {
+    {
+      _snake.push_section();
+      generate_food();
+    }
+  }
+  if (_screen.did_hit_borders(_snake.data().front().first)) {
+    _running = false;
+    _game_over = true;
+  }
 }
 void SnakeGame::render() noexcept {
   _screen.clear();
+  if (_game_over) {
+    _screen.show_gameover();
+    return;
+  }
   _screen.render(_snake.data());
   _screen.render(_food.data());
   fflush(stdout);

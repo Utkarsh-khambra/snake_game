@@ -12,6 +12,8 @@ public:
   std::span<std::pair<Point, std::string_view>> data() noexcept;
   void move() noexcept;
   void on_keys(char i) noexcept;
+  bool test_collision_with_itself() const noexcept;
+  bool test_collision(std::span<Point> targets) const noexcept;
 
 private:
   std::vector<std::pair<Point, std::string_view>> _sections;

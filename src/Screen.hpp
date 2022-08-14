@@ -10,8 +10,10 @@ public:
   Screen();
   void render(std::span<std::pair<Point, std::string_view>> vertices) noexcept;
   void render(std::span<Point> vertices) const noexcept;
-  void clear() noexcept;
-	bool is_on_screen(Point p) const noexcept;
+  void clear() const noexcept;
+  bool is_on_screen(Point p) const noexcept;
+  void show_gameover() const noexcept;
+  bool did_hit_borders(Point p) const noexcept;
 
 private:
   void set_cell_size();

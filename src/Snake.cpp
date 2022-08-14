@@ -75,18 +75,43 @@ void Snake::on_keys(char key) noexcept {
   using enum Direction;
   switch (key) {
   case 'a':
+    if (_dirs.front() == Right)
+      return;
     change_direction_to(Left);
     break;
   case 's':
+    if (_dirs.front() == Up)
+      return;
     change_direction_to(Up);
     break;
   case 'w':
+    if (_dirs.front() == Down)
+      return;
     change_direction_to(Down);
     break;
   case 'd':
+    if (_dirs.front() == Left)
+      return;
     change_direction_to(Right);
     break;
   default:
     break;
   }
+}
+bool Snake::test_collision_with_itself() const noexcept {
+  auto head = _sections.front().first;
+  for (auto i = 1; i < _sections.size(); ++i) {
+    if (test_collistion(head, _sections[i].first))
+      return true;
+  }
+  return false;
+}
+
+bool Snake::test_collision(std::span<Point> targets) const noexcept {
+  auto head = _sections.front().first;
+  for (auto i : targets) {
+    if (test_collistion(i, head))
+      return true;
+  }
+  return false;
 }

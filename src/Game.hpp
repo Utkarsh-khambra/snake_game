@@ -25,4 +25,5 @@ private:
   FoodStorage _food;
   std::uniform_int_distribution<int> _random_points;
   std::minstd_rand _gen;
+  bool _game_over = false;
 };

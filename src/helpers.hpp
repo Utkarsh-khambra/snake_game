@@ -22,3 +22,7 @@ void swith_to_normal_buffer() noexcept;
 void get_cell_dims() noexcept;
 void hide_cursor() noexcept;
 void show_cursor() noexcept;
+bool test_collistion(Point src, Point target) noexcept;
+bool test_collistion_with_line(Point src, Point line_start,
+                               Point line_end) noexcept;
+void move_cursor_to(int x, int y) noexcept;
