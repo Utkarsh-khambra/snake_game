@@ -1,6 +1,8 @@
 #include "Screen.hpp"
+#include "Food.hpp"
 #include "helpers.hpp"
 #include <array>
+#include <cassert>
 #include <charconv>
 #include <cmath>
 #include <cstdio>
@@ -17,14 +19,18 @@ bool Screen::is_on_screen(Point p) const noexcept {
   return contains(to_screen_space(p));
 }
 
-void Screen::print_cell_with(Point p, std::string_view fill) const noexcept {
+void Screen::print_cell_with(Point p, std::string_view fill,
+                             Color c) const noexcept {
   move_cursor_to(p.x + 1, p.y + 1);
   // fmt::print("\033[{};{}H", p.y + 1, p.x + 1);
-  auto s = p.props == VertProps::Blink ? fmt::format("\033[5m{}", fill)
-                                       : fmt::format("{}", fill);
+  auto s =
+      p.props == VertProps::Blink
+          ? fmt::format("\033[38;2;{};{};{}m\033[5m{}", c.r, c.g, c.b, fill)
+          : fmt::format("\033[38;2;{};{};{}m{}", c.r, c.g, c.b, fill);
   for (auto i : std::views::iota(0, _cells_per_block))
     fmt::print("{}", s);
   fmt::print("\033[25m");
+  fmt::print("\033[39m");
 }
 
 Screen::Screen() {
@@ -33,6 +39,11 @@ Screen::Screen() {
   _screen_width = w.ws_col;
   _screen_height = w.ws_row;
   set_cell_size();
+  std::random_device rd;
+  _gen.seed(rd());
+  using p = decltype(_random_x)::param_type;
+  _random_x.param(p(0, _screen_width / 2 - FOOD_SIZE));
+  _random_y.param(p(0, _screen_height / 2 - FOOD_SIZE));
 }
 
 Point Screen::to_screen_space(Point p) const noexcept {
@@ -41,25 +52,24 @@ Point Screen::to_screen_space(Point p) const noexcept {
   return p;
 }
 
-void Screen::render(
-    std::span<std::pair<Point, std::string_view>> vertices) noexcept {
+void Screen::render(std::span<std::pair<Point, std::string_view>> vertices,
+                    std::span<Color> colors) noexcept {
 
-  auto vs = vertices | std::views::transform([this](const auto &v) noexcept {
-              return std::make_pair(to_screen_space(v.first), v.second);
-            }) |
-            std::views::filter(
-                [this](const auto &v) noexcept { return contains(v.first); });
-  for (auto v : vs)
-    print_cell_with(v.first, v.second);
+  assert(vertices.size() == colors.size());
+  for (auto i : std::views::iota(size_t{0}, vertices.size())) {
+    if (auto p = to_screen_space(vertices[i].first); contains(p)) {
+      print_cell_with(p, vertices[i].second, colors[i]);
+    }
+  }
 }
-void Screen::render(std::span<Point> vertices) const noexcept {
+void Screen::render(std::span<Point> vertices, Color c) const noexcept {
 
   auto vs =
       vertices |
       std::views::transform(std::bind_front(&Screen::to_screen_space, this)) |
       std::views::filter(std::bind_front(&Screen::contains, this));
   for (auto v : vs)
-    print_cell_with(v, "█");
+    print_cell_with(v, "█", c);
 }
 
 bool Screen::contains(Point p) const noexcept {
@@ -92,10 +102,13 @@ void Screen::show_gameover() const noexcept {
 
 bool Screen::did_hit_borders(Point p) const noexcept {
   p = to_screen_space(p);
-  return test_collistion_with_line(p, {0, 0}, {_screen_width, 0}) ||
-         test_collistion_with_line(p, {0, 0}, {0, _screen_height}) ||
-         test_collistion_with_line(p, {_screen_width, 0},
-                                   {_screen_width, _screen_height}) ||
-         test_collistion_with_line(p, {0, _screen_height},
-                                   {_screen_width, _screen_height});
+  return !(p.x >= 0 && p.x < _screen_width && p.y >= 0 && p.y < _screen_height);
+}
+
+Point Screen::get_random_point() noexcept {
+  return {_random_x(_gen), _random_y(_gen)};
+}
+
+float Screen::get_aspect_ratio() const noexcept {
+  return static_cast<float>(_screen_width) / _screen_height;
 }

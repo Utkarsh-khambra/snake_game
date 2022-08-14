@@ -14,8 +14,13 @@ public:
   void on_keys(char i) noexcept;
   bool test_collision_with_itself() const noexcept;
   bool test_collision(std::span<Point> targets) const noexcept;
+  std::span<Color> colors() noexcept;
+  // Vertical to Horizontal speed ratio
+  void set_speed_ratio(float ratio) noexcept { _speed_ratio = ratio; }
 
 private:
   std::vector<std::pair<Point, std::string_view>> _sections;
+  std::vector<Color> _colrs;
   std::vector<Direction> _dirs;
+  float _speed_ratio = 1;
 };

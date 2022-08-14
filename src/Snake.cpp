@@ -1,11 +1,13 @@
 #include "Snake.hpp"
 #include "helpers.hpp"
+#include <bits/ranges_algobase.h>
 #include <fmt/core.h>
 #include <ranges>
 
-const int SNAKE_FAT = 1;
+// const int SNAKE_FAT = 1;
 Snake::Snake() {
-  _sections.push_back({{3, 4}, "█"});
+  _sections.push_back({{0, 0}, "█"});
+  _colrs.push_back({255, 0, 0});
   _dirs.push_back(Direction::Left);
 }
 
@@ -35,6 +37,7 @@ void Snake::push_section() noexcept {
   }
   _sections.push_back(last);
   _dirs.push_back(last_dir);
+  _colrs.push_back(Color{});
 }
 
 void Snake::change_direction_to(Direction d) noexcept { _dirs.front() = d; }
@@ -49,19 +52,19 @@ void Snake::move() noexcept {
   for (auto i : std::views::iota(size_t(0), _sections.size())) {
     switch (_dirs[i]) {
     case Up:
-      _sections[i].first.y += 1;
+      _sections[i].first.y += 1 /* std::ceil(1 / _speed_ratio) */;
       _sections[i].second = "█";
       break;
     case Down:
-      _sections[i].first.y -= 1;
+      _sections[i].first.y -= 1 /* std::ceil(1 / _speed_ratio) */;
       _sections[i].second = "█";
       break;
     case Left:
-      _sections[i].first.x -= 1;
+      _sections[i].first.x -= 1 /* std::floor(_speed_ratio) */;
       _sections[i].second = "█";
       break;
     case Right:
-      _sections[i].first.x += 1;
+      _sections[i].first.x += 1 /* std::floor(_speed_ratio) */;
       _sections[i].second = "█";
       break;
     default:
@@ -115,3 +118,5 @@ bool Snake::test_collision(std::span<Point> targets) const noexcept {
   }
   return false;
 }
+
+std::span<Color> Snake::colors() noexcept { return _colrs; }

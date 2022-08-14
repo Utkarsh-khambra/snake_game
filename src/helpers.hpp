@@ -11,6 +11,12 @@ struct Point {
   VertProps props = VertProps::None;
 };
 
+struct Color {
+  int r = 255;
+  int g = 255;
+  int b = 255;
+};
+
 struct Rect {
   Point tl; // Top left corner
   int length = 1;

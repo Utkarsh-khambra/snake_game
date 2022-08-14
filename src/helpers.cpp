@@ -17,14 +17,4 @@ bool test_collistion(Point src, Point target) noexcept {
   return src.x == target.x && src.y == target.y;
 }
 
-bool test_collistion_with_line(Point src, Point line_start,
-                               Point line_end) noexcept {
-  if (line_end.y == line_start.y) {
-    return src.y == line_end.y && (src.x < line_end.x && src.x >= line_start.x);
-  }
-  if (line_end.x == line_start.x) {
-    return src.x == line_end.x && (src.y < line_end.y && src.y >= line_start.y);
-  }
-  return false;
-}
 void move_cursor_to(int x, int y) noexcept { fmt::print("\033[{};{}H", y, x); }

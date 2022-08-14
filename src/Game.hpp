@@ -16,7 +16,6 @@ private:
   void handle_input() noexcept;
   void render() noexcept;
   void wait_for_input();
-  void generate_food() noexcept;
   Screen _screen;
   Snake _snake;
   std::mutex _input_mutex;
