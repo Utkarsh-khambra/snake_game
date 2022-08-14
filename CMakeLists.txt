@@ -36,6 +36,7 @@ add_executable(snake_game src/main.cpp
 													src/Snake.cpp
 													src/Screen.cpp
 													src/helpers.cpp
+													src/Food.cpp
 													)
 # Note: for header-only libraries change all PUBLIC flags to INTERFACE and create an interface
 # target: add_library(snake_game INTERFACE) set_target_properties(snake_game PROPERTIES

@@ -10,14 +10,19 @@
 // Linux Specific
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <utility>
 
-namespace {
-void inline print_cell_with(Point p, std::string_view fill) {
-  fmt::print("\033[{};{}H", p.y + 1, p.x + 1);
-  fmt::print("{}", fill);
+bool Screen::is_on_screen(Point p) const noexcept{
+	return contains(to_screen_space(p));
 }
 
-} // namespace
+void Screen::print_cell_with(Point p, std::string_view fill) const noexcept {
+  fmt::print("\033[{};{}H", p.y + 1, p.x + 1);
+  auto s = p.props == VertProps::Blink ? fmt::format("\033[5m{}", fill) : fmt::format("{}", fill);
+  for (auto i : std::views::iota(0, _cells_per_block))
+    fmt::print("{}", s);
+  fmt::print("\033[25m");
+}
 
 Screen::Screen() {
   struct winsize w;
@@ -25,8 +30,6 @@ Screen::Screen() {
   _screen_width = w.ws_col;
   _screen_height = w.ws_row;
   set_cell_size();
-  for (auto i : std::views::iota(0, _cells_per_block))
-    _single_cell.append("█");
 }
 
 Point Screen::to_screen_space(Point p) const noexcept {
@@ -35,14 +38,25 @@ Point Screen::to_screen_space(Point p) const noexcept {
   return p;
 }
 
-void Screen::render(std::span<Point> vertices) noexcept {
+void Screen::render(
+    std::span<std::pair<Point, std::string_view>> vertices) noexcept {
+
+  auto vs = vertices | std::views::transform([this](const auto &v) noexcept {
+              return std::make_pair(to_screen_space(v.first), v.second);
+            }) |
+            std::views::filter(
+                [this](const auto &v) noexcept { return contains(v.first); });
+  for (auto v : vs)
+    print_cell_with(v.first, v.second);
+}
+void Screen::render(std::span<Point> vertices) const noexcept {
 
   auto vs =
       vertices |
       std::views::transform(std::bind_front(&Screen::to_screen_space, this)) |
       std::views::filter(std::bind_front(&Screen::contains, this));
   for (auto v : vs)
-    print_cell_with(v, _single_cell);
+    print_cell_with(v, "█");
 }
 
 bool Screen::contains(Point p) const noexcept {

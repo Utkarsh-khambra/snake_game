@@ -9,11 +9,11 @@ public:
   Snake();
   void change_direction_to(Direction) noexcept;
   void push_section() noexcept;
-  std::span<Point> data() noexcept;
+  std::span<std::pair<Point, std::string_view>> data() noexcept;
   void move() noexcept;
   void on_keys(char i) noexcept;
 
 private:
-  std::vector<Point> _sections;
+  std::vector<std::pair<Point, std::string_view>> _sections;
   std::vector<Direction> _dirs;
 };

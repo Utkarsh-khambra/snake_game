@@ -3,9 +3,12 @@
 const std::string_view CSI = "\x9B";
 const std::string_view ESC = "\x1B";
 
+enum class VertProps { Blink, None };
+
 struct Point {
   int x = 0;
   int y = 0;
+  VertProps props = VertProps::None;
 };
 
 struct Rect {

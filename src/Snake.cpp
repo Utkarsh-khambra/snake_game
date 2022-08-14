@@ -5,7 +5,7 @@
 
 const int SNAKE_FAT = 1;
 Snake::Snake() {
-  _sections.push_back({3, 4});
+  _sections.push_back({{3, 4}, "█"});
   _dirs.push_back(Direction::Left);
 }
 
@@ -15,16 +15,20 @@ void Snake::push_section() noexcept {
   using enum Direction;
   switch (last_dir) {
   case Up:
-    last.y -= 1;
+    last.first.y -= 1;
+    last.second = "█";
     break;
   case Down:
-    last.y += 1;
+    last.first.y += 1;
+    last.second = "█";
     break;
   case Left:
-    last.x += 1;
+    last.first.x += 1;
+    last.second = "█";
     break;
   case Right:
-    last.x -= 1;
+    last.first.x -= 1;
+    last.second = "█";
     break;
   default:
     break;
@@ -34,7 +38,9 @@ void Snake::push_section() noexcept {
 }
 
 void Snake::change_direction_to(Direction d) noexcept { _dirs.front() = d; }
-std::span<Point> Snake::data() noexcept { return _sections; }
+std::span<std::pair<Point, std::string_view>> Snake::data() noexcept {
+  return _sections;
+}
 
 void Snake::move() noexcept {
   using enum Direction;
@@ -43,16 +49,20 @@ void Snake::move() noexcept {
   for (auto i : std::views::iota(size_t(0), _sections.size())) {
     switch (_dirs[i]) {
     case Up:
-      _sections[i].y += 1;
+      _sections[i].first.y += 1;
+      _sections[i].second = "█";
       break;
     case Down:
-      _sections[i].y -= 1;
+      _sections[i].first.y -= 1;
+      _sections[i].second = "█";
       break;
     case Left:
-      _sections[i].x -= 1;
+      _sections[i].first.x -= 1;
+      _sections[i].second = "█";
       break;
     case Right:
-      _sections[i].x += 1;
+      _sections[i].first.x += 1;
+      _sections[i].second = "█";
       break;
     default:
       break;

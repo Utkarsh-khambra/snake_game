@@ -11,6 +11,14 @@
 #include <unistd.h>
 
 using namespace std::chrono_literals;
+
+SnakeGame::SnakeGame() {
+  std::random_device rd;
+  _gen.seed(rd());
+  using p = decltype(_random_points)::param_type;
+  _random_points.param(p(0, 100));
+}
+
 static int kbhit() {
   timeval tv;
   fd_set rdfs;
@@ -25,7 +33,7 @@ static int kbhit() {
 
 void SnakeGame::wait_for_input() {
   char key_press = 0;
-  while (running) {
+  while (_running) {
     kbhit();
     auto read_c = read(STDIN_FILENO, &key_press, 1);
     if (read_c > 0 && _input_q.size() < 4) {
@@ -42,7 +50,7 @@ void SnakeGame::run() {
   std::thread t(std::bind_front(&SnakeGame::wait_for_input, this));
   char key_press = 0;
   int count = 1;
-  while (running) {
+  while (_running) {
     auto current = std::chrono::steady_clock::now();
     handle_input();
     update();
@@ -67,7 +75,7 @@ void SnakeGame::handle_input() noexcept {
       auto i = _input_q.front();
       _input_q.pop();
       if (i == 'q') {
-        running = false;
+        _running = false;
         _input_mutex.unlock();
         break;
       }
@@ -76,9 +84,23 @@ void SnakeGame::handle_input() noexcept {
     _input_mutex.unlock();
   }
 }
-void SnakeGame::update() noexcept { _snake.move(); }
+void SnakeGame::update() noexcept {
+  _snake.move();
+  if (_food.available() < 5)
+    generate_food();
+}
 void SnakeGame::render() noexcept {
   _screen.clear();
   _screen.render(_snake.data());
+  _screen.render(_food.data());
   fflush(stdout);
+}
+
+void SnakeGame::generate_food() noexcept {
+  Point p;
+  do {
+    p.x = _random_points(_gen);
+    p.y = _random_points(_gen);
+  } while (!_screen.is_on_screen(p));
+  _food.add_food(p, FoodType::Basic);
 }
